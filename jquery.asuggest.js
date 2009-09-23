@@ -95,7 +95,8 @@
             case KEY.RIGHT:
                var _selectionStart = $area.getSelection().start;
                $area.replaceSelection("");
-               this.selectionStart = this.selectionEnd = _selectionStart;
+               this.selectionStart = _selectionStart;
+               this.selectionEnd = _selectionStart;
                break;
 
             default:
