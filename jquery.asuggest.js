@@ -20,17 +20,22 @@
         });
     };
 
+    $.fn.asuggest.defaults = {
+        'delimiters': '\n ',
+        'minChunkSize': 1
+    };
+
     /* Make suggest:
      *
      * create and return jQuery object on the top of DOM object
      * and store suggests as part of this object
+     *
+     * @param area: HTML DOM element to add suggests to
+     * @param suggests: The array of suggest strings
+     * @param options: The options object
      */
     $.makeSuggest = function(area, suggests, options){
-        var default_options = {
-            'delimiters': '\n ',
-            'minChunkSize': 1
-        }
-        options = $.extend(default_options, options);
+        options = $.extend($.fn.asuggest.defaults, options);
 
         var KEY = {
                 LEFT: 37,
