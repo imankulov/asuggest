@@ -35,7 +35,7 @@
      * @param options: The options object
      */
     $.makeSuggest = function(area, suggests, options){
-        options = $.extend($.fn.asuggest.defaults, options);
+        options = $.extend({}, $.fn.asuggest.defaults, options);
 
         var KEY = {
                 LEFT: 37,
