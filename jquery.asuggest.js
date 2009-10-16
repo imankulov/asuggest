@@ -13,6 +13,19 @@
  */
 
 ; (function($) {
+    // workaround for Opera browser
+    if ($.browser.opera) {
+        $(document).keypress(function(e){
+            if ($.asuggestFocused) {
+                $.asuggestFocused.focus();
+                $.asuggestFocused = null;
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+    }
+
+    $.asuggestFocused = null;
 
     $.fn.asuggest = function(suggests, options) {
         return this.each(function(){
@@ -22,7 +35,9 @@
 
     $.fn.asuggest.defaults = {
         'delimiters': '\n ',
-        'minChunkSize': 1
+        'minChunkSize': 1,
+        'cycleOnTab': true,
+        'autoComplete': true
     };
 
     /* Make suggest:
@@ -55,8 +70,8 @@
         var $area = $(area);
         $area.suggests = suggests;
         $area.options = options;
-    
-        /* Internal method: get the chunk */
+
+        /* Internal method: get the chunk of text before the cursor */
         $area.getChunk = function() {
             var delimiters = this.options.delimiters.split(""); // array of chars
             var textBeforeCursor = this.val().substr(0, this.getSelection().start)
@@ -75,22 +90,71 @@
             }
         }
 
-        /* Internal method: get completion */
-        $area.getCompletion = function() {
+        /* Internal method: get completion.
+         * If performCycle is true then analyze getChunk() and and getSelection()
+         */
+        $area.getCompletion = function(performCycle) {
             var text = this.getChunk();
+            var selectionText = this.getSelection().text;
             var suggests = this.suggests;
+            var foundAlreadySelectedValue = false;
+            var firstMatchedValue = null;
+            // search the variant
             for (var i=0; i<suggests.length; i++){
                 var suggest = suggests[i];
-                if (suggest.indexOf(text) == 0){
-                    return suggest.substr(text.length);
+                // some variant is found
+                if (suggest.indexOf(text) == 0) {
+                    if (performCycle){
+                        if (text + selectionText == suggest){
+                            foundAlreadySelectedValue = true;
+                        } else if (foundAlreadySelectedValue) {
+                            return suggest.substr(text.length);
+                        } else if (firstMatchedValue == null) {
+                            firstMatchedValue = suggest;
+                        }
+                    } else {
+                        return suggest.substr(text.length);
+                    }
                 }
             }
-            return null;
+            if (performCycle && firstMatchedValue) {
+                return firstMatchedValue.substr(text.length);
+            } else {
+                return null;
+            }
         }
-   
+        $area.updateSelection = function(completion) {
+            if (completion != null) {
+                var area = this[0];
+                var _selectionStart = this.getSelection().start;
+                this.replaceSelection(completion);
+                area.selectionStart = _selectionStart;
+                area.selectionEnd = _selectionStart + completion.length;
+           }
+        }
+
+        $area.keydown(function(e){
+            if (e.keyCode == KEY.TAB) {
+                if ($area.options.cycleOnTab){
+                    var chunk = $area.getChunk();
+                    if (chunk.length >= $area.options.minChunkSize) {
+                        $area.updateSelection( $area.getCompletion(performCycle=true) );
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.focus();
+                    $.asuggestFocused = this;
+                    return false;
+                }
+            }
+        });
+
         $area.keyup(function(e){
             switch(e.keyCode){
-
+            case KEY.TAB:
+                if ($area.options.cycleOnTab){
+                    break;
+                }
             case KEY.ESC:
             case KEY.BACKSPACE:
             case KEY.DEL:
@@ -98,27 +162,24 @@
             case KEY.DOWN:
             case KEY.LEFT:
             case KEY.RIGHT:
-               var _selectionStart = $area.getSelection().start;
-               $area.replaceSelection("");
-               this.selectionStart = _selectionStart;
-               this.selectionEnd = _selectionStart;
-               break;
+                if ($area.options.autoComplete) {
+                    var _selectionStart = $area.getSelection().start;
+                    $area.replaceSelection("");
+                    this.selectionStart = _selectionStart;
+                    this.selectionEnd = _selectionStart;
+                }
+                break;
 
             default:
-                var chunk = $area.getChunk();
-                if (chunk.length >= $area.options.minChunkSize) {
-                    var completion = $area.getCompletion();
-                    if (completion != null){
-                        var _selectionStart = $area.getSelection().start;
-                        $area.replaceSelection(completion);
-                        this.selectionStart = _selectionStart;
-                        this.selectionEnd = _selectionStart + completion.length;
+                if ($area.options.autoComplete) {
+                    var chunk = $area.getChunk();
+                    if (chunk.length >= $area.options.minChunkSize) {
+                        $area.updateSelection( $area.getCompletion(performCycle=false) );
                     }
                 }
                 break;
             }
         });
-
         return $area;
     };
 })(jQuery);
