@@ -8,7 +8,7 @@
  *   http://www.gnu.org/licenses/gpl.html
  *
  * Requires:
- *   - jQuery (tested with 1.3.2)
+ *   - jQuery (tested with 1.3.x and 1.4.x)
  *   - jquery.fieldselection >= 0.2 (http://labs.0xab.cd/jquery/fieldselection/0.2.3-test/)
  */
 
@@ -127,9 +127,11 @@
             if (completion != null) {
                 var area = this[0];
                 var _selectionStart = this.getSelection().start;
+                var _scrollTop = $area[0].scrollTop;
                 this.replaceSelection(completion);
                 area.selectionStart = _selectionStart;
                 area.selectionEnd = _selectionStart + completion.length;
+                $area[0].scrollTop = _scrollTop; // firefox workaround
            }
         }
 
@@ -164,9 +166,11 @@
             case KEY.RIGHT:
                 if ($area.options.autoComplete) {
                     var _selectionStart = $area.getSelection().start;
+                    var _scrollTop = $area[0].scrollTop;
                     $area.replaceSelection("");
                     this.selectionStart = _selectionStart;
                     this.selectionEnd = _selectionStart;
+                    $area[0].scrollTop = _scrollTop; // firefox workaround
                 }
                 break;
 
