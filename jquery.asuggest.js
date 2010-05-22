@@ -181,7 +181,6 @@
         $area.keyup(function(e){
             var hasSpecialKeys = e.altKey || e.metaKey || e.ctrlKey;
             var hasSpecialKeysOrShift = hasSpecialKeys || e.shiftKey;
-            console.log(e);
             switch(e.keyCode){
             case KEY.UNKNOWN: // Special key released
             case KEY.SHIFT:
