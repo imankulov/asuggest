@@ -179,9 +179,17 @@
         });
 
         $area.keyup(function(e){
+            var hasSpecialKeys = e.altKey || e.metaKey || e.ctrlKey;
+            var hasSpecialKeysOrShift = hasSpecialKeys || e.shiftKey;
+            console.log(e);
             switch(e.keyCode){
+            case KEY.UNKNOWN: // Special key released
+            case KEY.SHIFT:
+            case KEY.CTRL:
+            case KEY.ALT:
+                break;
             case KEY.TAB:
-                if ($area.options.cycleOnTab){
+                if (!hasSpecialKeysOrShift && $area.options.cycleOnTab){
                     break;
                 }
             case KEY.ESC:
@@ -191,7 +199,7 @@
             case KEY.DOWN:
             case KEY.LEFT:
             case KEY.RIGHT:
-                if ($area.options.autoComplete) {
+                if (!hasSpecialKeysOrShift && $area.options.autoComplete) {
                     var _selectionStart = $area.getSelection().start;
                     var _scrollTop = $area[0].scrollTop;
                     $area.replaceSelection("");
@@ -201,7 +209,7 @@
                 }
                 break;
             default:
-                if ($area.options.autoComplete) {
+                if (!hasSpecialKeys && $area.options.autoComplete) {
                     var chunk = $area.getChunk();
                     if (chunk.length >= $area.options.minChunkSize) {
                         $area.updateSelection( $area.getCompletion(performCycle=false) );
