@@ -1,7 +1,7 @@
 /*
  * jQuery textarea suggest plugin
  *
- * Copyright (c) 2009 Roman Imankulov
+ * Copyright (c) 2009-2010 Roman Imankulov
  *
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
@@ -9,7 +9,7 @@
  *
  * Requires:
  *   - jQuery (tested with 1.3.x and 1.4.x)
- *   - jquery.fieldselection >= 0.2 (http://labs.0xab.cd/jquery/fieldselection/0.2.3-test/)
+ *   - jquery.a-tools >= 1.4.1 (http://plugins.jquery.com/project/a-tools)
  */
 
 ; (function($) {
@@ -81,7 +81,7 @@
         /* Internal method: get the chunk of text before the cursor */
         $area.getChunk = function() {
             var delimiters = this.options.delimiters.split(""); // array of chars
-            var textBeforeCursor = this.val().substr(0, this.getSelection().start)
+            var textBeforeCursor = this.val().substr(0, this.getSelection().start);
             var indexOfDelimiter = -1;
             for (var i in delimiters) {
                 var d = delimiters[i];
@@ -131,14 +131,18 @@
             }
         }
         $area.updateSelection = function(completion) {
-            if (completion != null) {
-                var area = this[0];
-                var _selectionStart = this.getSelection().start;
-                var _scrollTop = $area[0].scrollTop;
-                this.replaceSelection(completion);
-                area.selectionStart = _selectionStart;
-                area.selectionEnd = _selectionStart + completion.length;
-                $area[0].scrollTop = _scrollTop; // firefox workaround
+            if (completion) {
+                var _selectionStart = $area.getSelection().start;
+                var _selectionEnd = _selectionStart + completion.length;
+                if ($area.getSelection().text == ""){
+                    if ($area.val().length == _selectionStart) { // Weird IE workaround, I really have no idea why it works
+                        $area.setCaretPos(_selectionStart + 10000);
+                    }
+                    $area.insertAtCaretPos(completion);
+                } else {
+                    $area.replaceSelection(completion);
+                }
+                $area.setSelection(_selectionStart, _selectionEnd);
            }
         }
 
@@ -151,7 +155,7 @@
                     }
                     e.preventDefault();
                     e.stopPropagation();
-                    this.focus();
+                    $area.focus();
                     $.asuggestFocused = this;
                     return false;
                 }
@@ -162,14 +166,10 @@
                 // apply suggestion. Clean up selection and insert a space
                 var _selectionEnd = $area.getSelection().end +
                         $area.options.endingSymbols.length;
-                var _scrollTop = $area[0].scrollTop;
                 var _text = $area.getSelection().text +
                         $area.options.endingSymbols;
                 $area.replaceSelection(_text);
-                this.selectionStart = _selectionEnd;
-                this.selectionEnd = _selectionEnd;
-                // different kinds of finalization/workarounds
-                $area[0].scrollTop = _scrollTop;
+                $area.setSelection(_selectionEnd, _selectionEnd);
                 e.preventDefault();
                 e.stopPropagation();
                 this.focus();
@@ -186,6 +186,7 @@
             case KEY.SHIFT:
             case KEY.CTRL:
             case KEY.ALT:
+            case KEY.RETURN: // we don't want to suggest when RETURN key has pressed (another IE workaround)
                 break;
             case KEY.TAB:
                 if (!hasSpecialKeysOrShift && $area.options.cycleOnTab){
@@ -199,12 +200,7 @@
             case KEY.LEFT:
             case KEY.RIGHT:
                 if (!hasSpecialKeysOrShift && $area.options.autoComplete) {
-                    var _selectionStart = $area.getSelection().start;
-                    var _scrollTop = $area[0].scrollTop;
                     $area.replaceSelection("");
-                    this.selectionStart = _selectionStart;
-                    this.selectionEnd = _selectionStart;
-                    $area[0].scrollTop = _scrollTop; // firefox workaround
                 }
                 break;
             default:
