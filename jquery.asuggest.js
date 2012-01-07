@@ -60,7 +60,8 @@
         'cycleOnTab': true,
         'autoComplete': true,
         'endingSymbols': ' ',
-        'stopSuggestionKeys': [$.asuggestKeys.RETURN, $.asuggestKeys.SPACE]
+        'stopSuggestionKeys': [$.asuggestKeys.RETURN, $.asuggestKeys.SPACE],
+        'ignoreCase': false
     };
 
     /* Make suggest:
@@ -116,6 +117,10 @@
             // search the variant
             for (i = 0; i < suggests.length; i++) {
                 suggest = suggests[i];
+                if ($area.options.ignoreCase) {
+                    suggest = suggest.toLowerCase();
+                    text = text.toLowerCase();
+                }
                 // some variant is found
                 if (suggest.indexOf(text) === 0) {
                     if (performCycle) {
