@@ -160,7 +160,7 @@
         };
 
         $area.keydown(function (e) {
-            if (e.keyCode === KEY.RIGHT) {
+            if (e.keyCode === 39 && e.ctrlKey) {
                 if ($area.options.cycleOnTab) {
                     var chunk = $area.getChunk();
                     if (chunk.length >= $area.options.minChunkSize) {
