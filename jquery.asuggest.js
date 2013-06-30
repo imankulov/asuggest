@@ -16,7 +16,7 @@
 
 (function ($) {
     // workaround for Opera browser
-    if ($.browser.opera) {
+    if (navigator.userAgent.match(/opera/i)) {
         $(document).keypress(function (e) {
             if ($.asuggestFocused) {
                 $.asuggestFocused.focus();
