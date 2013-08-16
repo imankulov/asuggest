@@ -160,7 +160,7 @@
         };
 
         $area.keydown(function (e) {
-            if (e.keyCode === KEY.TAB) {
+            if (e.keyCode === 39 && e.ctrlKey) {
                 if ($area.options.cycleOnTab) {
                     var chunk = $area.getChunk();
                     if (chunk.length >= $area.options.minChunkSize) {
@@ -202,9 +202,6 @@
             case KEY.RETURN: // we don't want to suggest when RETURN key has pressed (another IE workaround)
                 break;
             case KEY.TAB:
-                if (!hasSpecialKeysOrShift && $area.options.cycleOnTab) {
-                    break;
-                }
             case KEY.ESC:
             case KEY.BACKSPACE:
             case KEY.DEL:
@@ -212,10 +209,9 @@
             case KEY.DOWN:
             case KEY.LEFT:
             case KEY.RIGHT:
-                if (!hasSpecialKeysOrShift && $area.options.autoComplete) {
-                    $area.replaceSelection("");
+                if (!hasSpecialKeysOrShift && $area.options.cycleOnTab) {
+                    break;
                 }
-                break;
             default:
                 if (!hasSpecialKeys && $area.options.autoComplete) {
                     var chunk = $area.getChunk();
