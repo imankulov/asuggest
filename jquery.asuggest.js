@@ -159,7 +159,7 @@
             }
         };
 
-        $area.keydown(function (e) {
+        $area.unbind('keydown.asuggest').bind('keydown.asuggest', function (e) {
             if (e.keyCode === KEY.TAB) {
                 if ($area.options.cycleOnTab) {
                     var chunk = $area.getChunk();
@@ -191,7 +191,7 @@
             }
         });
 
-        $area.keyup(function (e) {
+        $area.unbind('keyup.asuggest').bind('keyup.asuggest', function (e) {
             var hasSpecialKeys = e.altKey || e.metaKey || e.ctrlKey,
                 hasSpecialKeysOrShift = hasSpecialKeys || e.shiftKey;
             switch (e.keyCode) {
