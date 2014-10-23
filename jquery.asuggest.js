@@ -97,7 +97,7 @@
                 }
             }
             if (indexOfDelimiter < 0) {
-                return textBeforeCursor;
+                return '';
             } else {
                 return textBeforeCursor.substr(indexOfDelimiter + 1);
             }
